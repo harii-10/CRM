@@ -33,16 +33,16 @@ const login = async (req, res, next) => {
     if (!user || !(await user.comparePassword(password))) {
       throw Object.assign(new Error('Invalid credentials'), { status: 401 });
     }
-
+    
     // Use a hardcoded secret if the environment variable is not available
     const jwtSecret = process.env.JWT_SECRET || '9kP4vM2zW8qT3xR6yN1hJ5uG0tD7fK2zC9xB4iE8wA3oS6lQ2mH5jZ';
-
+    
     const token = jwt.sign(
-      { id: user._id, role: user.role },
-      jwtSecret,
+      { id: user._id, role: user.role }, 
+      jwtSecret, 
       { expiresIn: '1d' }
     );
-
+    
     res.json({ token, user: { id: user._id, email, name: user.name, role: user.role } });
   } catch (error) {
     console.error('Login error:', error);
@@ -66,20 +66,20 @@ const updateProfile = async (req, res, next) => {
   try {
     const { name, email } = req.body;
     const updates = {};
-
+    
     if (name) updates.name = name;
     if (email) updates.email = email;
-
+    
     const user = await User.findByIdAndUpdate(
       req.user.id,
       updates,
       { new: true }
     ).select('-password');
-
+    
     if (!user) {
       throw Object.assign(new Error('User not found'), { status: 404 });
     }
-
+    
     res.json(user);
   } catch (error) {
     next(error);

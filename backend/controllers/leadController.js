@@ -13,9 +13,30 @@ const createLead = async (req, res, next) => {
 
 const getLeads = async (req, res, next) => {
   try {
-    const leads = await Lead.find({ assignedTo: req.user.id })
+    const { stage, sortBy } = req.query;
+    let query = { assignedTo: req.user.id };
+
+    // Filter by stage if provided
+    if (stage) {
+      query.stage = stage;
+    }
+
+    // Build sort options
+    let sort = {};
+    if (sortBy === 'value') {
+      sort.value = -1; // Sort by value descending
+    } else if (sortBy === 'recent') {
+      sort.createdAt = -1; // Sort by most recent
+    } else {
+      // Default sort
+      sort.createdAt = -1;
+    }
+
+    const leads = await Lead.find(query)
+      .sort(sort)
       .populate('customer', 'name email')
       .populate('assignedTo', 'name');
+
     res.json(leads);
   } catch (error) {
     next(error);
@@ -40,4 +61,36 @@ const updateLead = async (req, res, next) => {
   }
 };
 
-module.exports = { createLead, getLeads, updateLead };
+const getLeadById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const lead = await Lead.findOne({ _id: id, assignedTo: req.user.id })
+      .populate('customer', 'name email company')
+      .populate('assignedTo', 'name');
+
+    if (!lead) {
+      throw Object.assign(new Error('Lead not found'), { status: 404 });
+    }
+
+    res.json(lead);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteLead = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const lead = await Lead.findOneAndDelete({ _id: id, assignedTo: req.user.id });
+
+    if (!lead) {
+      throw Object.assign(new Error('Lead not found'), { status: 404 });
+    }
+
+    res.json({ message: 'Lead deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { createLead, getLeads, getLeadById, updateLead, deleteLead };

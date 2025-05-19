@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const customerRoutes = require('./routes/customers');
 const leadRoutes = require('./routes/leads');
 const taskRoutes = require('./routes/tasks');
+const dashboardRoutes = require('./routes/dashboard');
 
 const errorMiddleware = require('./middleware/error');
 const { connectDB } = require('./config/database');
@@ -20,17 +21,29 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(helmet());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(helmet({
+  crossOriginResourcePolicy: false
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling middleware
 app.use(errorMiddleware);

@@ -56,4 +56,42 @@ const addInteraction = async (req, res, next) => {
   }
 };
 
-module.exports = { createCustomer, getCustomers, updateCustomer, addInteraction };
+const getCustomerById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const customer = await Customer.findOne({ _id: id, createdBy: req.user.id })
+      .populate('createdBy', 'name');
+
+    if (!customer) {
+      throw Object.assign(new Error('Customer not found'), { status: 404 });
+    }
+
+    res.json(customer);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteCustomer = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const customer = await Customer.findOneAndDelete({ _id: id, createdBy: req.user.id });
+
+    if (!customer) {
+      throw Object.assign(new Error('Customer not found'), { status: 404 });
+    }
+
+    res.json({ message: 'Customer deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createCustomer,
+  getCustomers,
+  getCustomerById,
+  updateCustomer,
+  deleteCustomer,
+  addInteraction
+};
