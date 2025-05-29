@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -19,10 +19,30 @@ const registerSchema = Yup.object().shape({
 });
 
 const Register = () => {
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Check for session timeout
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const lastActivity = localStorage.getItem('lastActivity');
+    const SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+    // Only redirect if token exists and session is still valid
+    if (token && lastActivity) {
+      const timeSinceLastActivity = Date.now() - parseInt(lastActivity);
+      if (timeSinceLastActivity < SESSION_TIMEOUT && isAuthenticated) {
+        navigate('/dashboard');
+      } else {
+        // Clear expired session
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('lastActivity');
+      }
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (values) => {
     try {
@@ -68,9 +88,10 @@ const Register = () => {
         throw new Error(loginData.error || 'Failed to login after registration');
       }
 
-      // Store token and user data
+      // Store token, user data, and last activity timestamp
       localStorage.setItem('token', loginData.token);
       localStorage.setItem('user', JSON.stringify(loginData.user));
+      localStorage.setItem('lastActivity', Date.now().toString());
 
       navigate('/dashboard');
     } catch (err) {

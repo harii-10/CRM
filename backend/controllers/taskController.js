@@ -2,18 +2,29 @@ const Task = require('../models/task');
 
 const createTask = async (req, res, next) => {
   try {
-    const { title, description, dueDate, relatedTo, relatedToModel } = req.body;
-    const task = new Task({
+    const { title, description, dueDate, status, priority, relatedTo } = req.body;
+
+    // Handle the relatedTo structure from frontend
+    let taskData = {
       title,
       description,
       dueDate,
-      relatedTo,
-      relatedToModel,
+      status: status || 'Not Started',
+      priority: priority || 'Medium',
       assignedTo: req.user.id,
-    });
+    };
+
+    // Handle relatedTo field - it comes as an object with type and id
+    if (relatedTo && relatedTo.type && relatedTo.type !== 'none' && relatedTo.id) {
+      taskData.relatedTo = relatedTo.id;
+      taskData.relatedToModel = relatedTo.type === 'customer' ? 'Customer' : 'Lead';
+    }
+
+    const task = new Task(taskData);
     await task.save();
     res.status(201).json(task);
   } catch (error) {
+    console.error('Error creating task:', error);
     next(error);
   }
 };

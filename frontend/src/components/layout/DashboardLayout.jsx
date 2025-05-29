@@ -15,7 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -33,10 +33,8 @@ const DashboardLayout = ({ children }) => {
   ];
 
   const handleLogout = () => {
-    // Direct logout approach
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+    // Use the logout function from AuthContext
+    logout();
   };
 
   const toggleSidebar = () => {
@@ -146,8 +144,10 @@ const DashboardLayout = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4">
-          {children}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

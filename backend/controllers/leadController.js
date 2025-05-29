@@ -2,11 +2,20 @@ const Lead = require('../models/lead');
 
 const createLead = async (req, res, next) => {
   try {
-    const { customer, source, stage, value } = req.body;
-    const lead = new Lead({ customer, source, stage, value, assignedTo: req.user.id });
+    const { customer, title, source, stage, value, notes } = req.body;
+    const lead = new Lead({
+      customer,
+      title,
+      source,
+      stage: stage || 'New',
+      value: value || 0,
+      notes,
+      assignedTo: req.user.id
+    });
     await lead.save();
     res.status(201).json(lead);
   } catch (error) {
+    console.error('Error creating lead:', error);
     next(error);
   }
 };

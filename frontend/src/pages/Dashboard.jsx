@@ -6,7 +6,7 @@ import { dashboardService } from '../services/api';
 import { format } from 'date-fns';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
-  <div className="bg-white rounded-lg shadow p-5">
+  <div className="bg-white rounded-lg shadow p-5 flex-1">
     <div className="flex items-center">
       <div className={`rounded-full p-3 ${color}`}>
         <Icon className="h-6 w-6 text-white" />
@@ -31,7 +31,7 @@ const Dashboard = () => {
         setLoading(true);
         const statsData = await dashboardService.getStats();
         const performanceData = await dashboardService.getLeadPerformance();
-        
+
         setStats(statsData);
         setLeadPerformance(performanceData);
       } catch (err) {
@@ -78,37 +78,37 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Total Customers" 
-          value={stats?.counts.customers || 0} 
-          icon={FiUsers} 
-          color="bg-blue-500" 
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Customers"
+          value={stats?.counts.customers || 0}
+          icon={FiUsers}
+          color="bg-blue-500"
         />
-        <StatCard 
-          title="Active Leads" 
-          value={stats?.counts.leads || 0} 
-          icon={FiTrendingUp} 
-          color="bg-green-500" 
+        <StatCard
+          title="Active Leads"
+          value={stats?.counts.leads || 0}
+          icon={FiTrendingUp}
+          color="bg-green-500"
         />
-        <StatCard 
-          title="Total Tasks" 
-          value={stats?.counts.tasks || 0} 
-          icon={FiCheckSquare} 
-          color="bg-purple-500" 
+        <StatCard
+          title="Total Tasks"
+          value={stats?.counts.tasks || 0}
+          icon={FiCheckSquare}
+          color="bg-purple-500"
         />
-        <StatCard 
-          title="Tasks Due Today" 
-          value={stats?.counts.tasksDueToday || 0} 
-          icon={FiAlertCircle} 
-          color="bg-red-500" 
+        <StatCard
+          title="Tasks Due Today"
+          value={stats?.counts.tasksDueToday || 0}
+          icon={FiAlertCircle}
+          color="bg-red-500"
         />
       </div>
 
       {/* Lead Performance Chart */}
-      <div className="bg-white rounded-lg shadow p-5">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Lead Performance (Last 30 Days)</h2>
-        <div className="h-80">
+      <div className="bg-white rounded-lg shadow p-5 w-full">
+        <h2 className="text-lg font-medium text-gray-900 mb-4 text-center">Lead Performance (Last 30 Days)</h2>
+        <div className="h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -127,30 +127,34 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Recent Leads */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 className="text-lg font-medium text-gray-900">Recent Leads</h3>
+            <h3 className="text-lg font-medium text-gray-900 text-center">Recent Leads</h3>
           </div>
-          <ul className="divide-y divide-gray-200">
-            {stats?.recentActivities.leads.map((lead) => (
-              <li key={lead._id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                <Link to={`/leads/${lead._id}`} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-primary-600 truncate">{lead.customer.name}</p>
-                    <p className="text-sm text-gray-500">{lead.stage} - ${lead.value}</p>
-                  </div>
-                  <div className="ml-2 flex-shrink-0 flex">
-                    <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      {lead.source}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            ))}
+          <ul className="divide-y divide-gray-200 min-h-[200px]">
+            {stats?.recentActivities.leads && stats.recentActivities.leads.length > 0 ? (
+              stats.recentActivities.leads.map((lead) => (
+                <li key={lead._id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                  <Link to={`/leads/${lead._id}`} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-primary-600 truncate">{lead.customer.name}</p>
+                      <p className="text-sm text-gray-500">{lead.stage} - ${lead.value}</p>
+                    </div>
+                    <div className="ml-2 flex-shrink-0 flex">
+                      <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        {lead.source}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <li className="px-4 py-8 text-center text-gray-500">No recent leads</li>
+            )}
           </ul>
-          <div className="bg-gray-50 px-4 py-4 sm:px-6">
+          <div className="bg-gray-50 px-4 py-4 sm:px-6 text-center">
             <Link to="/leads" className="text-sm font-medium text-primary-600 hover:text-primary-500">
               View all leads
             </Link>
@@ -160,34 +164,38 @@ const Dashboard = () => {
         {/* Recent Tasks */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 className="text-lg font-medium text-gray-900">Recent Tasks</h3>
+            <h3 className="text-lg font-medium text-gray-900 text-center">Recent Tasks</h3>
           </div>
-          <ul className="divide-y divide-gray-200">
-            {stats?.recentActivities.tasks.map((task) => (
-              <li key={task._id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                <Link to={`/tasks/${task._id}`} className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-primary-600 truncate">{task.title}</p>
-                    <p className="text-sm text-gray-500">
-                      Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}
-                    </p>
-                  </div>
-                  <div className="ml-2 flex-shrink-0 flex">
-                    <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      task.status === 'Completed' 
-                        ? 'bg-green-100 text-green-800' 
-                        : task.status === 'In Progress' 
-                          ? 'bg-yellow-100 text-yellow-800' 
-                          : 'bg-red-100 text-red-800'
-                    }`}>
-                      {task.status}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            ))}
+          <ul className="divide-y divide-gray-200 min-h-[200px]">
+            {stats?.recentActivities.tasks && stats.recentActivities.tasks.length > 0 ? (
+              stats.recentActivities.tasks.map((task) => (
+                <li key={task._id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                  <Link to={`/tasks/${task._id}`} className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-primary-600 truncate">{task.title}</p>
+                      <p className="text-sm text-gray-500">
+                        Due: {format(new Date(task.dueDate), 'MMM dd, yyyy')}
+                      </p>
+                    </div>
+                    <div className="ml-2 flex-shrink-0 flex">
+                      <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        task.status === 'Completed'
+                          ? 'bg-green-100 text-green-800'
+                          : task.status === 'In Progress'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                      }`}>
+                        {task.status}
+                      </p>
+                    </div>
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <li className="px-4 py-8 text-center text-gray-500">No recent tasks</li>
+            )}
           </ul>
-          <div className="bg-gray-50 px-4 py-4 sm:px-6">
+          <div className="bg-gray-50 px-4 py-4 sm:px-6 text-center">
             <Link to="/tasks" className="text-sm font-medium text-primary-600 hover:text-primary-500">
               View all tasks
             </Link>
